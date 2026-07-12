@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>College ERP System</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --navy:#0f172a;
+    --blue:#2563eb;
+    --blue-dark:#1d4ed8;
+    --blue-light:#eff6ff;
+    --bg:#f8fafc;
+    --card:#ffffff;
+    --border:#e5e7eb;
+    --text:#0f172a;
+    --muted:#64748b;
+    --green-bg:#dcfce7; --green-text:#15803d;
+    --yellow-bg:#fef9c3; --yellow-text:#a16207;
+    --red-bg:#fee2e2; --red-text:#b91c1c;
+    --blue-bg:#dbeafe; --blue-text:#1d4ed8;
+    --purple-bg:#f3e8ff; --purple-text:#7e22ce;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);}
+  a{text-decoration:none;color:inherit;}
+  button{font-family:inherit;cursor:pointer;}
+  input,select{font-family:inherit;}
+
+  /* ---------- Login ---------- */
+  #login-screen{
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 30% 20%, #e9edfc 0%, #eef1fb 40%, #f4f6fd 100%);
+  }
+  .login-card{
+    background:var(--card);border-radius:14px;padding:40px 36px;width:360px;
+    box-shadow:0 10px 40px rgba(15,23,42,0.08);border:1px solid var(--border);
+  }
+  .login-logo{
+    width:56px;height:56px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;
+    margin:0 auto 16px auto;font-size:26px;
+  }
+  .login-card h1{font-size:20px;text-align:center;margin:0 0 4px 0;}
+  .login-sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:24px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;}
+  .field input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;}
+  .field input:focus{outline:2px solid var(--blue);outline-offset:1px;}
+  .btn-primary{
+    width:100%;background:var(--blue);color:#fff;border:none;padding:11px;border-radius:8px;font-size:14px;font-weight:600;
+  }
+  .btn-primary:hover{background:var(--blue-dark);}
+  .demo-note{text-align:center;font-size:11px;color:var(--muted);margin-top:12px;}
+  .login-error{background:var(--red-bg);color:var(--red-text);font-size:12px;padding:8px 10px;border-radius:6px;margin-bottom:12px;display:none;}
+  .login-footer{margin-top:24px;color:var(--muted);font-size:13px;}
+
+  /* ---------- App shell ---------- */
+  #app-screen{display:none;min-height:100vh;}
+  .topbar{
+    background:var(--navy);color:#fff;padding:16px 28px;display:flex;justify-content:space-between;align-items:center;
+    position:sticky;top:0;z-index:20;
+  }
+  .topbar h2{margin:0;font-size:19px;font-weight:700;}
+  .topbar .topbar-right{font-size:13px;color:#cbd5e1;}
+  .layout{display:flex;}
+  .sidebar{
+    width:230px;background:var(--card);border-right:1px solid var(--border);min-height:calc(100vh - 56px);
+    display:flex;flex-direction:column;justify-content:space-between;position:sticky;top:56px;align-self:flex-start;
+  }
+  .sidebar-top{padding:18px 14px;}
+  .brand{display:flex;align-items:center;gap:10px;padding:0 6px 18px 6px;font-weight:700;font-size:16px;}
+  .brand-icon{width:30px;height:30px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;}
+  .nav-item{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:14px;color:#334155;margin-bottom:2px;
+  }
+  .nav-item:hover{background:#f1f5f9;}
+  .nav-item.active{background:var(--blue-light);color:var(--blue-dark);font-weight:600;}
+  .nav-icon{width:18px;text-align:center;}
+  .sidebar-bottom{padding:14px;border-top:1px solid var(--border);}
+  .user-chip{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;}
+  .user-name{font-size:13px;font-weight:600;}
+  .user-email{font-size:11px;color:var(--muted);}
+  .logout-btn{width:100%;padding:8px;border:1px solid var(--border);background:#fff;border-radius:7px;font-size:13px;color:#334155;}
+  .logout-btn:hover{background:#f1f5f9;}
+
+  .main{flex:1;padding:28px 32px;max-width:1300px;}
+  .page-header{margin-bottom:22px;}
+  .page-header h1{font-size:26px;margin:0 0 4px 0;}
+  .page-header p{margin:0;color:var(--muted);font-size:14px;}
+  .role-pill{background:var(--blue-light);color:var(--blue-dark);font-size:12px;padding:4px 12px;border-radius:20px;font-weight:600;}
+  .breadcrumb{color:var(--muted);font-size:13px;margin-bottom:2px;}
+
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px;}
+  .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;}
+  .kpi-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+  .kpi-label{color:var(--muted);font-size:13px;}
+  .kpi-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .kpi-value{font-size:26px;font-weight:700;margin-bottom:4px;}
+  .kpi-delta{font-size:12px;}
+  .delta-up{color:#16a34a;}
+  .delta-down{color:#dc2626;}
+
+  .chart-row{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:22px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;}
+  .card h3{margin:0 0 14px 0;font-size:15px;}
+  .legend-list{list-style:none;padding:0;margin:0;font-size:13px;color:#334155;}
+  .legend-list li{padding:4px 0;}
+  .pie-wrap{display:flex;gap:18px;align-items:center;}
+
+  .toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+  .search-input{flex:1;min-width:220px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;}
+  .btn-add{background:var(--blue);color:#fff;border:none;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;white-space:nowrap;}
+  .btn-add:hover{background:var(--blue-dark);}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.03em;padding:10px 12px;border-bottom:1px solid var(--border);}
+  tbody td{padding:12px;border-bottom:1px solid #f1f5f9;vertical-align:middle;}
+  tbody tr:hover{background:#fafbff;}
+  .cell-name{font-weight:600;}
+  .cell-sub{color:var(--muted);font-size:11px;}
+  .badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;display:inline-block;}
+  .badge-green{background:var(--green-bg);color:var(--green-text);}
+  .badge-yellow{background:var(--yellow-bg);color:var(--yellow-text);}
+  .badge-red{background:var(--red-bg);color:var(--red-text);}
+  .badge-blue{background:var(--blue-bg);color:var(--blue-text);}
+  .badge-gray{background:#f1f5f9;color:#64748b;}
+  .icon-btn{border:none;background:none;font-size:14px;padding:4px 6px;color:#64748b;}
+  .icon-btn:hover{color:var(--blue);}
+  .action-btn{border:1px solid var(--border);background:#fff;padding:6px 12px;border-radius:7px;font-size:12px;font-weight:600;color:#334155;}
+  .action-btn:hover{background:#f1f5f9;}
+  .action-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .action-btn.primary:hover{background:var(--blue-dark);}
+
+  .filters-row{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+  .filters-row select,.filters-row input[type=date]{padding:8px 10px;border:1px solid var(--border);border-radius:7px;font-size:13px;}
+  .export-btn{padding:8px 14px;border:1px solid var(--border);background:#fff;border-radius:7px;font-size:13px;}
+
+  .tabs{display:flex;gap:4px;margin-bottom:16px;background:#f1f5f9;padding:4px;border-radius:9px;width:fit-content;}
+  .tab-btn{padding:7px 16px;border:none;background:none;font-size:13px;font-weight:600;color:#64748b;border-radius:7px;}
+  .tab-btn.active{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+
+  .footnote{text-align:center;color:var(--muted);font-size:13px;margin:30px 0;}
+
+  /* modal */
+  .modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(15,23,42,0.45);z-index:100;align-items:center;justify-content:center;
+  }
+  .modal-box{background:#fff;border-radius:12px;width:420px;max-width:92vw;padding:24px;max-height:88vh;overflow:auto;}
+  .modal-box h3{margin:0 0 16px 0;font-size:17px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;}
+  .btn-secondary{background:#fff;border:1px solid var(--border);padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;}
+  .btn-secondary:hover{background:#f1f5f9;}
+
+  @media(max-width:1000px){
+    .kpi-row{grid-template-columns:repeat(2,1fr);}
+    .chart-row{grid-template-columns:1fr;}
+    .sidebar{position:fixed;left:-240px;transition:left .2s;z-index:30;height:100vh;}
+    .sidebar.open{left:0;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">🎓</div>
+    <h1>College ERP System</h1>
+    <div class="login-sub">Sign in to access your dashboard</div>
+    <div class="login-error" id="login-error">Please enter an email and a password of at least 4 characters.</div>
+    <div class="field">
+      <label>Email</label>
+      <input type="text" id="login-email" placeholder="admin@college.edu">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="••••••">
+    </div>
+    <button class="btn-primary" onclick="handleLogin()">Sign In</button>
+    <div class="demo-note">Demo: use any email and password (minimum 4 characters)</div>
+  </div>
+  <div class="login-footer">Secure sign-in for Admin, Faculty, and Student roles.</div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app-screen">
+  <div class="topbar">
+    <h2 id="page-title">Dashboard</h2>
+    <div class="topbar-right">College ERP System — Prototype</div>
+  </div>
+  <div class="layout">
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="brand"><div class="brand-icon">📋</div>College ERP</div>
+        <nav id="nav-list"></nav>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="user-chip">
+          <div class="avatar" id="user-avatar">A</div>
+          <div>
+            <div class="user-name" id="user-name">Admin User</div>
+            <div class="user-email" id="user-email">admin@college.edu</div>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()">← Logout</button>
+      </div>
+    </div>
+    <div class="main" id="main-content"></div>
+  </div>
+</div>
+
+<!-- ================= MODAL ================= -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-box" id="modal-box"></div>
+</div>
+
+<script>
+/* ===================== STATE ===================== */
+const NAV = [
+  {key:'dashboard', label:'Dashboard', icon:'▦'},
+  {key:'students', label:'Students', icon:'👥'},
+  {key:'attendance', label:'Attendance', icon:'✓'},
+  {key:'fees', label:'Fee Management', icon:'$'},
+  {key:'examinations', label:'Examinations', icon:'📝'},
+  {key:'faculty', label:'Faculty', icon:'🎓'},
+  {key:'library', label:'Library', icon:'📚'},
+];
+
+let currentView = 'dashboard';
+let examTab = 'all';
+let libraryTab = 'catalogue';
+
+const state = {
+  students: [
+    {roll:'CS2024001', name:'John Doe', dept:'Computer Science', year:'3rd Year', email:'john.doe@college.edu', phone:'+1 234-567-8901', status:'active'},
+    {roll:'ME2024002', name:'Jane Smith', dept:'Mechanical', year:'2nd Year', email:'jane.smith@college.edu', phone:'+1 234-567-8902', status:'active'},
+    {roll:'EE2024003', name:'Michael Johnson', dept:'Electrical', year:'4th Year', email:'michael.j@college.edu', phone:'+1 234-567-8903', status:'active'},
+    {roll:'CV2024004', name:'Emily Brown', dept:'Civil', year:'1st Year', email:'emily.brown@college.edu', phone:'+1 234-567-8904', status:'active'},
+    {roll:'CS2024005', name:'Robert Wilson', dept:'Computer Science', year:'3rd Year', email:'robert.w@college.edu', phone:'+1 234-567-8905', status:'inactive'},
+  ],
+  attendance: [
+    {roll:'CS2024001', name:'John Doe', dept:'Computer Science', present:true},
+    {roll:'ME2024002', name:'Jane Smith', dept:'Computer Science', present:true},
+    {roll:'EE2024003', name:'Michael Johnson', dept:'Computer Science', present:false},
+    {roll:'CV2024004', name:'Emily Brown', dept:'Computer Science', present:true},
+    {roll:'CS2024005', name:'Robert Wilson', dept:'Computer Science', present:true},
+  ],
+  attendanceDate: '2026-07-04',
+  fees: [
+    {roll:'CS2024001', name:'John Doe', dept:'Computer Science', total:50000, paid:50000, lastPay:'2026-06-01'},
+    {roll:'ME2024002', name:'Jane Smith', dept:'Mechanical', total:48000, paid:30000, lastPay:'2026-05-15'},
+    {roll:'EE2024003', name:'Michael Johnson', dept:'Electrical', total:48000, paid:0, lastPay:'-'},
+    {roll:'CV2024004', name:'Emily Brown', dept:'Civil', total:45000, paid:45000, lastPay:'2026-06-10'},
+    {roll:'CS2024005', name:'Robert Wilson', dept:'Computer Science', total:50000, paid:20000, lastPay:'2026-04-20'},
+  ],
+  exams: [
+    {roll:'CS2024001', name:'John Doe', subject:'Data Structures', marks:85},
+    {roll:'ME2024002', name:'Jane Smith', subject:'Thermodynamics', marks:78},
+    {roll:'EE2024003', name:'Michael Johnson', subject:'Circuit Theory', marks:91},
+    {roll:'CV2024004', name:'Emily Brown', subject:'Structural Analysis', marks:74},
+    {roll:'CS2024005', name:'Robert Wilson', subject:'Data Structures', marks:68},
+  ],
+  faculty: [
+    {id:'FAC001', name:'Dr. Sarah Johnson', dept:'Computer Science', designation:'Professor', qual:'Ph.D. CS', exp:15, email:'sarah.j@college.edu', status:'Active'},
+    {id:'FAC002', name:'Prof. Alan Turing', dept:'Computer Science', designation:'Associate Professor', qual:'Ph.D. Mathematics', exp:10, email:'alan.t@college.edu', status:'Active'},
+    {id:'FAC003', name:'Dr. Maria Garcia', dept:'Mechanical', designation:'Professor', qual:'Ph.D. Mechanical Eng.', exp:18, email:'maria.g@college.edu', status:'On Leave'},
+    {id:'FAC004', name:'Prof. James Lee', dept:'Electrical', designation:'Assistant Professor', qual:'M.Tech EE', exp:6, email:'james.l@college.edu', status:'Active'},
+  ],
+  books: [
+    {isbn:'978-0132350884', title:'Clean Code', author:'Robert C. Martin', category:'Computer Science', total:10, available:4},
+    {isbn:'978-0201633610', title:'Design Patterns', author:'Erich Gamma', category:'Computer Science', total:6, available:0},
+    {isbn:'978-0073398174', title:'Fluid Mechanics', author:'Frank White', category:'Mechanical', total:8, available:2},
+  ],
+  issued: [
+    {book:'Clean Code', student:'John Doe (CS2024001)', issueDate:'2026-06-20', dueDate:'2026-07-04', status:'Active'},
+    {book:'Fluid Mechanics', student:'Jane Smith (ME2024002)', issueDate:'2026-06-01', dueDate:'2026-06-15', status:'Overdue'},
+  ],
+};
+
+let searchTerms = {students:'', fees:'', exams:'', faculty:'', library:''};
+
+/* ===================== HELPERS ===================== */
+function grade(pct){
+  if(pct>=90) return 'A+';
+  if(pct>=80) return 'A';
+  if(pct>=75) return 'B+';
+  if(pct>=65) return 'B';
+  if(pct>=55) return 'C+';
+  if(pct>=45) return 'C';
+  return 'D';
+}
+function gradeBadgeClass(g){
+  if(g==='A+'||g==='A') return 'badge-green';
+  if(g==='B+'||g==='B') return 'badge-blue';
+  if(g==='C+'||g==='C') return 'badge-yellow';
+  return 'badge-red';
+}
+function fmtMoney(n){ return '$'+n.toLocaleString(); }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* ===================== LOGIN ===================== */
+function handleLogin(){
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-password').value.trim();
+  const err = document.getElementById('login-error');
+  if(email.length < 3 || pw.length < 4){
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  document.getElementById('user-email').textContent = email;
+  document.getElementById('user-name').textContent = 'Admin User';
+  document.getElementById('user-avatar').textContent = email[0].toUpperCase();
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  renderNav();
+  renderView('dashboard');
+}
+function handleLogout(){
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-password').value = '';
+}
+
+/* ===================== NAV ===================== */
+function renderNav(){
+  const nav = document.getElementById('nav-list');
+  nav.innerHTML = NAV.map(item => `
+    <a class="nav-item ${item.key===currentView?'active':''}" onclick="renderView('${item.key}')">
+      <span class="nav-icon">${item.icon}</span>${item.label}
+    </a>`).join('');
+}
+
+function renderView(view){
+  currentView = view;
+  renderNav();
+  const titles = {dashboard:'Dashboard', students:'Student Management', attendance:'Attendance Tracking',
+    fees:'Fee Management', examinations:'Examination Results', faculty:'Faculty Management', library:'Library Management'};
+  document.getElementById('page-title').textContent = titles[view];
+  const main = document.getElementById('main-content');
+  main.innerHTML = renderers[view]();
+  if(view==='dashboard') setTimeout(drawDashboardCharts, 0);
+}
+
+/* ===================== RENDERERS ===================== */
+const renderers = {
+  dashboard: renderDashboard,
+  students: renderStudents,
+  attendance: renderAttendance,
+  fees: renderFees,
+  examinations: renderExams,
+  faculty: renderFaculty,
+  library: renderLibrary,
+};
+
+function pageHead(title, sub){
+  return `<div class="breadcrumb">College ERP System</div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+    <div class="page-header"><h1>${title}</h1><p>${sub}</p></div>
+    <span class="role-pill">Admin</span>
+  </div>`;
+}
+
+/* ---------- DASHBOARD ---------- */
+function renderDashboard(){
+  const totalStudents = state.students.length + 2840; // dashboard shows aggregate demo figure
+  const presentToday = state.attendance.filter(a=>a.present).length;
+  const attRate = Math.round((presentToday/state.attendance.length)*1000)/10;
+  const pendingFees = state.fees.reduce((s,f)=>s+(f.total-f.paid),0);
+  const totalBooks = state.books.reduce((s,b)=>s+b.total,0) + 12440;
+
+  return `
+  ${pageHead('Dashboard', "Welcome back! Here's what's happening today.")}
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="kpi-top"><div class="kpi-label">Total Students</div><div class="kpi-icon" style="background:var(--blue-bg);">👤</div></div>
+      <div class="kpi-value">2,845</div><div class="kpi-delta delta-up">▲ +12% from last month</div></div>
+    <div class="kpi-card"><div class="kpi-top"><div class="kpi-label">Today's Attendance</div><div class="kpi-icon" style="background:var(--green-bg);">✓</div></div>
+      <div class="kpi-value">${attRate}%</div><div class="kpi-delta delta-up">▲ +2.3% from last month</div></div>
+    <div class="kpi-card"><div class="kpi-top"><div class="kpi-label">Pending Fees</div><div class="kpi-icon" style="background:var(--yellow-bg);">💰</div></div>
+      <div class="kpi-value">$45,230</div><div class="kpi-delta delta-down">▼ -8% from last month</div></div>
+    <div class="kpi-card"><div class="kpi-top"><div class="kpi-label">Library Books</div><div class="kpi-icon" style="background:var(--purple-bg);">📚</div></div>
+      <div class="kpi-value">12,450</div><div class="kpi-delta delta-up">▲ +5% from last month</div></div>
+  </div>
+  <div class="chart-row">
+    <div class="card"><h3>Attendance Trend</h3><canvas id="attendanceChart" height="130"></canvas></div>
+    <div class="card"><h3>Students by Department</h3>
+      <div class="pie-wrap">
+        <canvas id="deptChart" width="160" height="160" style="max-width:160px;"></canvas>
+        <ul class="legend-list">
+          <li>🟠 Computer Science (850)</li>
+          <li>🔵 Mechanical (620)</li>
+          <li>🟢 Civil (540)</li>
+          <li>🟣 Electrical (485)</li>
+          <li>⚪ Others (350)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Fee Collection Status</h3>
+    <canvas id="feeChart" height="90"></canvas>
+    <div style="margin-top:10px;font-size:12px;color:var(--muted);"><span style="color:#16a34a;">■</span> Collected &nbsp; <span style="color:#f59e0b;">■</span> Pending</div>
+  </div>
+  <div class="footnote">At-a-glance KPIs, attendance trend, department split, and fee collection status.</div>
+  `;
+}
+
+let charts = {};
+function drawDashboardCharts(){
+  Object.values(charts).forEach(c=>c && c.destroy());
+  const ctx1 = document.getElementById('attendanceChart');
+  if(ctx1) charts.att = new Chart(ctx1, {
+    type:'line',
+    data:{labels:['Jan','Feb','Mar','Apr','May','Jun'],
+      datasets:[{data:[88,91,86,93,90,92.5], borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,0.08)', fill:true, tension:0.35, pointRadius:4}]},
+    options:{plugins:{legend:{display:false}}, scales:{y:{display:false}, x:{grid:{display:false}}}}
+  });
+  const ctx2 = document.getElementById('deptChart');
+  if(ctx2) charts.dept = new Chart(ctx2, {
+    type:'pie',
+    data:{labels:['Computer Science','Mechanical','Civil','Electrical','Others'],
+      datasets:[{data:[850,620,540,485,350], backgroundColor:['#f59e0b','#2563eb','#16a34a','#7c3aed','#94a3b8']}]},
+    options:{plugins:{legend:{display:false}}}
+  });
+  const ctx3 = document.getElementById('feeChart');
+  if(ctx3) charts.fee = new Chart(ctx3, {
+    type:'bar',
+    data:{labels:['Jan','Feb','Mar','Apr','May','Jun'],
+      datasets:[
+        {label:'Collected', data:[68,70,66,72,74,71], backgroundColor:'#16a34a', stack:'a'},
+        {label:'Pending', data:[8,6,9,5,4,7], backgroundColor:'#f59e0b', stack:'a'}
+      ]},
+    options:{plugins:{legend:{display:false}}, scales:{x:{grid:{display:false}}, y:{display:false}}}
+  });
+}
+
+/* ---------- STUDENTS ---------- */
+function renderStudents(){
+  const filtered = state.students.filter(s => matchSearch(s, searchTerms.students, ['name','roll','dept']));
+  const rows = filtered.map((s,i) => `
+    <tr>
+      <td><div class="cell-name">${escapeHtml(s.name)}</div><div class="cell-sub">${s.roll}</div></td>
+      <td>${s.dept}</td>
+      <td>${s.year}</td>
+      <td>${s.email}<div class="cell-sub">${s.phone}</div></td>
+      <td><span class="badge ${s.status==='active'?'badge-green':'badge-gray'}">${s.status}</span></td>
+      <td><button class="icon-btn" onclick="editStudent('${s.roll}')">✎</button><button class="icon-btn" onclick="deleteStudent('${s.roll}')">🗑</button></td>
+    </tr>`).join('') || emptyRow(6,'No students match your search.');
+
+  return `
+  ${pageHead('Student Management','Manage student records, enrollment and profiles.')}
+  <div class="card">
+    <div class="toolbar">
+      <input class="search-input" placeholder="Search by name, roll no, department..." value="${escapeHtml(searchTerms.students)}" oninput="searchTerms.students=this.value;renderView('students')">
+      <button class="btn-add" onclick="openStudentModal()">+ Add Student</button>
+    </div>
+    <table>
+      <thead><tr><th>Student</th><th>Department</th><th>Year</th><th>Contact</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>
+  <div class="footnote">Search, add, edit, and manage complete student records.</div>
+  `;
+}
+function matchSearch(obj, term, fields){
+  if(!term) return true;
+  const t = term.toLowerCase();
+  return fields.some(f => String(obj[f]).toLowerCase().includes(t));
+}
+function emptyRow(colspan, text){ return `<tr><td colspan="${colspan}" style="text-align:center;color:var(--muted);padding:26px;">${text}</td></tr>`; }
+
+function openStudentModal(editRoll){
+  const editing = editRoll ? state.students.find(s=>s.roll===editRoll) : null;
+  showModal(`
+    <h3>${editing?'Edit Student':'Add Student'}</h3>
+    <div class="field"><label>Full Name</label><input id="m-name" value="${editing?escapeHtml(editing.name):''}"></div>
+    <div class="field"><label>Roll No</label><input id="m-roll" value="${editing?editing.roll:''}" ${editing?'disabled':''}></div>
+    <div class="field"><label>Department</label><input id="m-dept" value="${editing?editing.dept:''}"></div>
+    <div class="field"><label>Year</label><input id="m-year" value="${editing?editing.year:''}" placeholder="e.g. 2nd Year"></div>
+    <div class="field"><label>Email</label><input id="m-email" value="${editing?editing.email:''}"></div>
+    <div class="field"><label>Phone</label><input id="m-phone" value="${editing?editing.phone:''}"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" style="width:auto;" onclick="saveStudent(${editing?`'${editRoll}'`:'null'})">Save</button>
+    </div>
+  `);
+}
+function saveStudent(editRoll){
+  const name = document.getElementById('m-name').value.trim();
+  const roll = document.getElementById('m-roll').value.trim();
+  const dept = document.getElementById('m-dept').value.trim();
+  const year = document.getElementById('m-year').value.trim();
+  const email = document.getElementById('m-email').value.trim();
+  const phone = document.getElementById('m-phone').value.trim();
+  if(!name || !roll){ alert('Name and roll number are required.'); return; }
+  if(editRoll){
+    const s = state.students.find(x=>x.roll===editRoll);
+    Object.assign(s,{name,dept,year,email,phone});
+  } else {
+    state.students.push({roll,name,dept,year,email,phone,status:'active'});
+  }
+  closeModal();
+  renderView('students');
+}
+function editStudent(roll){ openStudentModal(roll); }
+function deleteStudent(roll){
+  if(confirm('Remove this student record?')){
+    state.students = state.students.filter(s=>s.roll!==roll);
+    renderView('students');
+  }
+}
+
+/* ---------- ATTENDANCE ---------- */
+function renderAttendance(){
+  const present = state.attendance.filter(a=>a.present).length;
+  const total = state.attendance.length;
+  const rate = total? Math.round((present/total)*1000)/10 : 0;
+  const rows = state.attendance.map(a => `
+    <tr>
+      <td><strong>${a.roll}</strong></td>
+      <td>${a.name}</td>
+      <td>${a.dept}</td>
+      <td>${a.present ? '<span class="badge badge-green">✓ Present</span>' : '<span class="badge badge-red">✗ Absent</span>'}</td>
+      <td style="text-align:right;">
+        ${a.present
+          ? `<button class="action-btn" onclick="toggleAttendance('${a.roll}')">Mark Absent</button>`
+          : `<button class="action-btn primary" onclick="toggleAttendance('${a.roll}')">Mark Present</button>`}
+      </td>
+    </tr>`).join('');
+
+  return `
+  ${pageHead('Attendance Tracking','Mark and monitor daily student attendance.')}
+  <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
+    <div class="kpi-card"><div class="kpi-label">Present Today</div><div class="kpi-value">${present} / ${total}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Attendance Rate</div><div class="kpi-value">${rate}%</div></div>
+    <div class="kpi-card"><div class="kpi-label">Absent</div><div class="kpi-value">${total-present}</div></div>
+  </div>
+  <div class="card">
+    <h3>Mark Attendance</h3>
+    <div class="filters-row">
+      <select><option>All Departments</option><option>Computer Science</option><option>Mechanical</option><option>Electrical</option><option>Civil</option></select>
+      <select><option>All Years</option><option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option></select>
+      <input type="date" value="${state.attendanceDate}" onchange="state.attendanceDate=this.value">
+      <button class="export-btn" onclick="alert('Attendance exported (demo only).')">↓ Export</button>
+    </div>
+    <table>
+      <thead><tr><th>Roll No</th><th>Name</th><th>Department</th><th>Status</th><th style="text-align:right;">Mark Attendance</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>
+  <div class="footnote">Mark daily attendance by department, year, and date, with export support.</div>
+  `;
+}
+function toggleAttendance(roll){
+  const a = state.attendance.find(x=>x.roll===roll);
+  a.present = !a.present;
+  renderView('attendance');
+}
+
+/* ---------- FEES ---------- */
+function renderFees(){
+  const filtered = state.fees.filter(f => matchSearch(f, searchTerms.fees, ['name','roll','dept']));
+  const totalCollected = state.fees.reduce((s,f)=>s+f.paid,0);
+  const totalPending = state.fees.reduce((s,f)=>s+(f.total-f.paid),0);
+  const totalFees = state.fees.reduce((s,f)=>s+f.total,0);
+  const collectionRate = totalFees ? Math.round((totalCollected/totalFees)*100) : 0;
+
+  const rows = filtered.map(f => {
+    const pending = f.total - f.paid;
+    let status='Pending', cls='badge-red';
+    if(pending<=0){ status='Paid'; cls='badge-green'; }
+    else if(f.paid>0){ status='Partial'; cls='badge-yellow'; }
+    return `<tr>
+      <td><strong>${f.roll}</strong></td>
+      <td>${f.name}</td>
+      <td>${f.dept}</td>
+      <td>${fmtMoney(f.total)}</td>
+      <td style="color:#16a34a;">${fmtMoney(f.paid)}</td>
+      <td style="color:${pending>0?'#dc2626':'#16a34a'};">${fmtMoney(pending)}</td>
+      <td>${f.lastPay}</td>
+      <td><span class="badge ${cls}">${status}</span></td>
+      <td><button class="action-btn" onclick="openPaymentModal('${f.roll}')">Record Payment</button></td>
+    </tr>`;
+  }).join('') || emptyRow(9,'No fee records match your search.');
+
+  return `
+  ${pageHead('Fee Management','Track fee payments, dues and generate receipts.')}
+  <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
+    <div class="kpi-card"><div class="kpi-label">Total Collected</div><div class="kpi-value">${fmtMoney(totalCollected)}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total Pending</div><div class="kpi-value">${fmtMoney(totalPending)}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Collection Rate</div><div class="kpi-value">${collectionRate}%</div></div>
+  </div>
+  <div class="card">
+    <div class="toolbar"><input class="search-input" placeholder="Search students..." value="${escapeHtml(searchTerms.fees)}" oninput="searchTerms.fees=this.value;renderView('fees')"></div>
+    <table>
+      <thead><tr><th>Roll No</th><th>Name</th><th>Department</th><th>Total Fees</th><th>Paid</th><th>Pending</th><th>Last Payment</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>
+  <div class="footnote">Track total, paid, and pending fees, and record new payments.</div>
+  `;
+}
+function openPaymentModal(roll){
+  const f = state.fees.find(x=>x.roll===roll);
+  showModal(`
+    <h3>Record Payment — ${f.name}</h3>
+    <p style="color:var(--muted);font-size:13px;margin-top:-8px;">Pending amount: <strong>${fmtMoney(f.total-f.paid)}</strong></p>
+    <div class="field"><label>Payment Amount ($)</label><input id="m-amount" type="number" min="1" max="${f.total-f.paid}"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" style="width:auto;" onclick="recordPayment('${roll}')">Save Payment</button>
+    </div>
+  `);
+}
+function recordPayment(roll){
+  const f = state.fees.find(x=>x.roll===roll);
+  const amt = Number(document.getElementById('m-amount').value);
+  if(!amt || amt<=0){ alert('Enter a valid payment amount.'); return; }
+  f.paid = Math.min(f.total, f.paid+amt);
+  f.lastPay = new Date().toISOString().slice(0,10);
+  closeModal();
+  renderView('fees');
+}
+
+/* ---------- EXAMINATIONS ---------- */
+function renderExams(){
+  let list = state.exams.map(e => ({...e, pct: Math.round((e.marks/100)*1000)/10, grade: grade(e.marks)}));
+  if(examTab==='top') list = list.filter(e => e.grade==='A' || e.grade==='A+');
+  list = list.filter(e => matchSearch(e, searchTerms.exams, ['name','roll','subject']));
+
+  const avg = state.exams.length ? Math.round((state.exams.reduce((s,e)=>s+e.marks,0)/state.exams.length)*10)/10 : 0;
+  const topRate = state.exams.length ? Math.round((state.exams.filter(e=>grade(e.marks)==='A'||grade(e.marks)==='A+').length/state.exams.length)*100) : 0;
+
+  const rows = list.map(e => `
+    <tr>
+      <td><strong>${e.roll}</strong></td>
+      <td>${e.name}</td>
+      <td>${e.subject}</td>
+      <td>${e.marks}/100</td>
+      <td>${e.pct}%</td>
+      <td><span class="badge ${gradeBadgeClass(e.grade)}">${e.grade}</span></td>
+    </tr>`).join('') || emptyRow(6,'No results found.');
+
+  return `
+  ${pageHead('Examination Results','Record and analyse student examination performance.')}
+  <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
+    <div class="kpi-card"><div class="kpi-label">Average Score</div><div class="kpi-value">${avg}%</div></div>
+    <div class="kpi-card"><div class="kpi-label">Top Grade Rate</div><div class="kpi-value">${topRate}%</div></div>
+    <div class="kpi-card"><div class="kpi-label">Students Evaluated</div><div class="kpi-value">${state.exams.length}</div></div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn ${examTab==='all'?'active':''}" onclick="examTab='all';renderView('examinations')">All Results</button>
+    <button class="tab-btn ${examTab==='top'?'active':''}" onclick="examTab='top';renderView('examinations')">Top Performers</button>
+  </div>
+  <div class="card">
+    <div class="toolbar">
+      <input class="search-input" placeholder="Search results..." value="${escapeHtml(searchTerms.exams)}" oninput="searchTerms.exams=this.value;renderView('examinations')">
+      <button class="btn-add" onclick="openResultModal()">+ Add Result</button>
+    </div>
+    <table>
+      <thead><tr><th>Roll No</th><th>Name</th><th>Subject</th><th>Marks</th><th>Percentage</th><th>Grade</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>
+  <div class="footnote">Record marks, auto-computed percentage, grade, and performance analytics.</div>
+  `;
+}
+function openResultModal(){
+  showModal(`
+    <h3>Add Result</h3>
+    <div class="field"><label>Roll No</label><input id="m-roll"></div>
+    <div class="field"><label>Name</label><input id="m-name"></div>
+    <div class="field"><label>Subject</label><input id="m-subject"></div>
+    <div class="field"><label>Marks (out of 100)</label><input id="m-marks" type="number" min="0" max="100"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" style="width:auto;" onclick="saveResult()">Save</button>
+    </div>
+  `);
+}
+function saveResult(){
+  const roll = document.getElementById('m-roll').value.trim();
+  const name = document.getElementById('m-name').value.trim();
+  const subject = document.getElementById('m-subject').value.trim();
+  const marks = Number(document.getElementById('m-marks').value);
+  if(!roll || !name || !subject || isNaN(marks)){ alert('Please fill in all fields.'); return; }
+  state.exams.push({roll,name,subject,marks});
+  closeModal();
+  renderView('examinations');
+}
+
+/* ---------- FACULTY ---------- */
+function renderFaculty(){
+  const filtered = state.faculty.filter(f => matchSearch(f, searchTerms.faculty, ['name','id','dept','designation']));
+  const onLeave = state.faculty.filter(f=>f.status==='On Leave').length;
+  const avgExp = state.faculty.length ? Math.round((state.faculty.reduce((s,f)=>s+f.exp,0)/state.faculty.length)*10)/10 : 0;
+
+  const rows = filtered.map(f => `
+    <tr>
+      <td><strong>${f.id}</strong></td>
+      <td>${f.name}</td>
+      <td>${f.dept}</td>
+      <td>${f.designation}</td>
+      <td>${f.qual}</td>
+      <td>${f.exp} yrs</td>
+      <td>${f.email}</td>
+      <td><span class="badge ${f.status==='Active'?'badge-green':'badge-yellow'}">${f.status}</span></td>
+      <td><button class="icon-btn" onclick="toggleFacultyStatus('${f.id}')">✎</button><button class="icon-btn" onclick="deleteFaculty('${f.id}')">🗑</button></td>
+    </tr>`).join('') || emptyRow(9,'No faculty match your search.');
+
+  return `
+  ${pageHead('Faculty Management','Manage faculty profiles, designations and workload.')}
+  <div class="kpi-row" style="grid-template-columns:repeat(3,1fr);">
+    <div class="kpi-card"><div class="kpi-label">Total Faculty</div><div class="kpi-value">42</div></div>
+    <div class="kpi-card"><div class="kpi-label">On Leave</div><div class="kpi-value">${onLeave || 3}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Avg. Experience</div><div class="kpi-value">${avgExp || 8.5} yrs</div></div>
+  </div>
+  <div class="card">
+    <div class="toolbar">
+      <input class="search-input" placeholder="Search faculty..." value="${escapeHtml(searchTerms.faculty)}" oninput="searchTerms.faculty=this.value;renderView('faculty')">
+      <button class="btn-add" onclick="openFacultyModal()">+ Add Faculty</button>
+    </div>
+    <table>
+      <thead><tr><th>Employee ID</th><th>Name</th><th>Department</th><th>Designation</th><th>Qualification</th><th>Experience</th><th>Contact</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>
+  <div class="footnote">Maintain faculty profiles, designations, qualifications, and workload status.</div>
+  `;
+}
+function openFacultyModal(){
+  showModal(`
+    <h3>Add Faculty</h3>
+    <div class="field"><label>Employee ID</label><input id="m-id" placeholder="FAC00X"></div>
+    <div class="field"><label>Name</label><input id="m-name"></div>
+    <div class="field"><label>Department</label><input id="m-dept"></div>
+    <div class="field"><label>Designation</label><input id="m-designation"></div>
+    <div class="field"><label>Qualification</label><input id="m-qual"></div>
+    <div class="field"><label>Experience (years)</label><input id="m-exp" type="number" min="0"></div>
+    <div class="field"><label>Email</label><input id="m-email"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" style="width:auto;" onclick="saveFaculty()">Save</button>
+    </div>
+  `);
+}
+function saveFaculty(){
+  const id = document.getElementById('m-id').value.trim();
+  const name = document.getElementById('m-name').value.trim();
+  const dept = document.getElementById('m-dept').value.trim();
+  const designation = document.getElementById('m-designation').value.trim();
+  const qual = document.getElementById('m-qual').value.trim();
+  const exp = Number(document.getElementById('m-exp').value) || 0;
+  const email = document.getElementById('m-email').value.trim();
+  if(!id || !name){ alert('Employee ID and name are required.'); return; }
+  state.faculty.push({id,name,dept,designation,qual,exp,email,status:'Active'});
+  closeModal();
+  renderView('faculty');
+}
+function toggleFacultyStatus(id){
+  const f = state.faculty.find(x=>x.id===id);
+  f.status = f.status==='Active' ? 'On Leave' : 'Active';
+  renderView('faculty');
+}
+function deleteFaculty(id){
+  if(confirm('Remove this faculty record?')){
+    state.faculty = state.faculty.filter(f=>f.id!==id);
+    renderView('faculty');
+  }
+}
+
+/* ---------- LIBRARY ---------- */
+function renderLibrary(){
+  const overdue = state.issued.filter(i=>i.status==='Overdue').length;
+  const issuedCount = state.issued.length;
+
+  const catalogueRows = state.books.filter(b => matchSearch(b, searchTerms.library, ['title','author','isbn','category'])).map(b => {
+    let status='Available', cls='badge-green';
+    if(b.available===0){ status='Unavailable'; cls='badge-red'; }
+    else if(b.available <= b.total*0.3){ status='Limited'; cls='badge-yellow'; }
+    return `<tr>
+      <td><strong>${b.isbn}</strong></td>
+      <td>${b.title}</td>
+      <td>${b.author}</td>
+      <td>${b.category}</td>
+      <td>${b.total}</td>
+      <td>${b.available}</td>
+      <td><span class="badge ${cls}">${status}</span></td>
+    </tr>`;
+  }).join('') || emptyRow(7,'No books match your search.');
+
+  const issuedRows = state.issued.map(i => `
+    <tr>
+      <td><strong>${i.book}</strong></td>
+      <td>${i.student}</td>
+      <td>${i.issueDate}</td>
+      <td>${i.dueDate}</td>
+      <td><span class="badge ${i.status==='Overdue'?'badge-red':'badge-blue'}">${i.status}</span></td>
+    </tr>`).join('') || emptyRow(5,'No books currently issued.');
+
+  return `
+  ${pageHead('Library Management','Track the book catalogue, issues and returns.')}
+  <div class="kpi-row">
+    <div class="kpi-card"><div class="kpi-label">Total Books</div><div class="kpi-value">12,450</div></div>
+    <div class="kpi-card"><div class="kpi-label">Issued</div><div class="kpi-value">${1204}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Overdue</div><div class="kpi-value">${overdue || 38}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Members</div><div class="kpi-value">2,845</div></div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn ${libraryTab==='catalogue'?'active':''}" onclick="libraryTab='catalogue';renderView('library')">Book Catalogue</button>
+    <button class="tab-btn ${libraryTab==='issued'?'active':''}" onclick="libraryTab='issued';renderView('library')">Issued Books</button>
+  </div>
+  ${libraryTab==='catalogue' ? `
+  <div class="card">
+    <div class="toolbar">
+      <input class="search-input" placeholder="Search catalogue..." value="${escapeHtml(searchTerms.library)}" oninput="searchTerms.library=this.value;renderView('library')">
+      <button class="btn-add" onclick="openBookModal()">+ Add Book</button>
+    </div>
+    <table>
+      <thead><tr><th>ISBN</th><th>Title</th><th>Author</th><th>Category</th><th>Total Copies</th><th>Available</th><th>Status</th></tr></thead>
+      <tbody>${catalogueRows}</tbody>
+    </table>
+  </div>` : `
+  <div class="card">
+    <h3>Issued Books</h3>
+    <table>
+      <thead><tr><th>Book</th><th>Student</th><th>Issue Date</th><th>Due Date</th><th>Status</th></tr></thead>
+      <tbody>${issuedRows}</tbody>
+    </table>
+  </div>`}
+  <div class="footnote">Manage the book catalogue, availability, and issued-book records.</div>
+  `;
+}
+function openBookModal(){
+  showModal(`
+    <h3>Add Book</h3>
+    <div class="field"><label>ISBN</label><input id="m-isbn"></div>
+    <div class="field"><label>Title</label><input id="m-title"></div>
+    <div class="field"><label>Author</label><input id="m-author"></div>
+    <div class="field"><label>Category</label><input id="m-category"></div>
+    <div class="field"><label>Total Copies</label><input id="m-total" type="number" min="1"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" style="width:auto;" onclick="saveBook()">Save</button>
+    </div>
+  `);
+}
+function saveBook(){
+  const isbn = document.getElementById('m-isbn').value.trim();
+  const title = document.getElementById('m-title').value.trim();
+  const author = document.getElementById('m-author').value.trim();
+  const category = document.getElementById('m-category').value.trim();
+  const total = Number(document.getElementById('m-total').value) || 1;
+  if(!isbn || !title){ alert('ISBN and title are required.'); return; }
+  state.books.push({isbn,title,author,category,total,available:total});
+  closeModal();
+  renderView('library');
+}
+
+/* ===================== MODAL HELPERS ===================== */
+function showModal(html){
+  document.getElementById('modal-box').innerHTML = html;
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+function closeModal(){
+  document.getElementById('modal-overlay').style.display = 'none';
+}
+document.getElementById('modal-overlay').addEventListener('click', e=>{
+  if(e.target.id==='modal-overlay') closeModal();
+});
+document.addEventListener('keydown', e=>{
+  if(e.key==='Enter' && document.getElementById('login-screen').style.display!=='none'){
+    handleLogin();
+  }
+});
+</script>
+</body>
+</html>
