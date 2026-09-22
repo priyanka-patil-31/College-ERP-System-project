@@ -38,7 +38,7 @@ export function DashboardLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
@@ -49,15 +49,15 @@ export function DashboardLayout() {
 
       {/* Sidebar — mobile */}
       <aside
-        className={`fixed top-0 left-0 h-full bg-white border-r border-gray-200 w-64 z-50 transition-transform duration-300 lg:hidden ${
+        className={`app-sidebar fixed top-0 left-0 h-full text-sidebar-foreground w-64 z-50 transition-transform duration-300 lg:hidden ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
             <div className="flex items-center gap-2">
-              <div className="bg-blue-600 p-2 rounded-lg">
+              <div className="brand-mark p-2 rounded-xl">
                 <LayoutDashboard className="w-6 h-6 text-white" />
               </div>
               <span className="font-semibold">College ERP</span>
@@ -85,8 +85,8 @@ export function DashboardLayout() {
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                     isActive
-                      ? "bg-blue-50 text-blue-600"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-sidebar-accent text-white shadow-sm"
+                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent/70 hover:text-white"
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -97,9 +97,9 @@ export function DashboardLayout() {
           </nav>
 
           {/* User profile */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-sidebar-border">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white">
+              <div className="w-10 h-10 bg-sidebar-primary rounded-full flex items-center justify-center text-white font-semibold">
                 {user.name.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
@@ -107,7 +107,7 @@ export function DashboardLayout() {
                 <p className="text-xs text-gray-500 truncate">{user.email}</p>
               </div>
             </div>
-            <Button variant="outline" className="w-full" onClick={logout}>
+            <Button variant="outline" className="w-full border-sidebar-border bg-transparent text-white hover:bg-sidebar-accent" onClick={logout}>
               <LogOut className="w-4 h-4 mr-2" />
               Logout
             </Button>
@@ -117,22 +117,22 @@ export function DashboardLayout() {
 
       {/* Sidebar — desktop (collapsible) */}
       <aside
-        className="hidden lg:flex fixed top-0 left-0 h-full bg-white border-r border-gray-200 z-50 flex-col transition-all duration-300"
+        className="app-sidebar hidden lg:flex fixed top-0 left-0 h-full text-sidebar-foreground z-50 flex-col transition-all duration-300"
         style={{ width: desktopSidebarOpen ? "16rem" : "4rem" }}
       >
         <div className="flex flex-col h-full overflow-hidden">
           {/* Logo */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 min-h-[65px]">
+          <div className="flex items-center justify-between p-4 border-b border-sidebar-border min-h-[72px]">
             {desktopSidebarOpen && (
               <div className="flex items-center gap-2">
-                <div className="bg-blue-600 p-2 rounded-lg shrink-0">
+                <div className="brand-mark p-2 rounded-xl shrink-0">
                   <LayoutDashboard className="w-6 h-6 text-white" />
                 </div>
                 <span className="font-semibold whitespace-nowrap">College ERP</span>
               </div>
             )}
             {!desktopSidebarOpen && (
-              <div className="bg-blue-600 p-2 rounded-lg mx-auto">
+                <div className="brand-mark p-2 rounded-xl mx-auto">
                 <LayoutDashboard className="w-6 h-6 text-white" />
               </div>
             )}
@@ -154,8 +154,8 @@ export function DashboardLayout() {
                     desktopSidebarOpen ? "" : "justify-center"
                   } ${
                     isActive
-                      ? "bg-blue-50 text-blue-600"
-                      : "text-gray-700 hover:bg-gray-100"
+                      ? "bg-sidebar-accent text-white shadow-sm"
+                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent/70 hover:text-white"
                   }`}
                 >
                   <Icon className="w-5 h-5 shrink-0" />
@@ -168,11 +168,11 @@ export function DashboardLayout() {
           </nav>
 
           {/* User profile */}
-          <div className="p-2 border-t border-gray-200">
+          <div className="p-2 border-t border-sidebar-border">
             {desktopSidebarOpen ? (
               <div className="px-1 mb-2">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white shrink-0">
+                  <div className="w-10 h-10 bg-sidebar-primary rounded-full flex items-center justify-center text-white font-semibold shrink-0">
                     {user.name.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -180,7 +180,7 @@ export function DashboardLayout() {
                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
                   </div>
                 </div>
-                <Button variant="outline" className="w-full" onClick={logout}>
+                <Button variant="outline" className="w-full border-sidebar-border bg-transparent text-white hover:bg-sidebar-accent" onClick={logout}>
                   <LogOut className="w-4 h-4 mr-2" />
                   Logout
                 </Button>
@@ -189,7 +189,7 @@ export function DashboardLayout() {
               <button
                 onClick={logout}
                 title="Logout"
-                className="w-full flex justify-center p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+                className="w-full flex justify-center p-2 rounded-lg text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-white transition-colors"
               >
                 <LogOut className="w-5 h-5" />
               </button>
@@ -204,7 +204,7 @@ export function DashboardLayout() {
         style={{ paddingLeft: desktopSidebarOpen ? "16rem" : "4rem" }}
       >
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
+        <header className="workspace-header border-b border-border sticky top-0 z-30">
           <div className="flex items-center justify-between px-4 py-3">
             {/* Mobile hamburger */}
             <Button
@@ -227,7 +227,7 @@ export function DashboardLayout() {
             </Button>
 
             <div className="flex-1 lg:flex-none">
-              <h1 className="text-lg font-semibold lg:hidden">College ERP</h1>
+              <h1 className="text-lg font-semibold tracking-tight lg:hidden">College ERP</h1>
             </div>
             <Button
               variant="outline"
@@ -242,7 +242,7 @@ export function DashboardLayout() {
         </header>
 
         {/* Page content */}
-        <main className="p-4 lg:p-6">
+        <main className="page-enter p-4 lg:p-8 max-w-[1600px]">
           <Outlet />
         </main>
       </div>
